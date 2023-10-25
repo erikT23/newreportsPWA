@@ -10,6 +10,17 @@ if (navigator.serviceWorker) {
   navigator.serviceWorker.register("/sw.js");
 }
 
+const isOnline = () => {
+  if (navigator.onLine) {
+    toastMessage("Tienes conexion a internet").showToast();
+  } else {
+    toastMessage("Estas en modo offline").showToast();
+  }
+};
+
+window.addEventListener("online", isOnline);
+window.addEventListener("offline", isOnline);
+
 var fullname = ``;
 var role = ``;
 const changeView = (role) => {

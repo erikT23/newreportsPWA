@@ -1,3 +1,7 @@
+importScripts("https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js");
+importScripts("/assets/js/utils/db-utils.js");
+
+
 const STATIC = "static-v1";
 const DYNAMIC = "dynamic-v1";
 const INMUTABLE = "inmutable-v1";
@@ -13,8 +17,8 @@ const APP_SHELL = [
   "/assets/js/auth/signin.js",
   "/assets/js/admin/admin.home.controller.js",
   "/assets/js/admin/admin.users.controller.js",
-  "/assets/js/axios/axios-instance.js",
-  "/assets/js/toast/toast.js",
+  "/assets/js/axios/axios-intance.js",
+  "/assets/js/toast/toasts.js",
   "/assets/js/main.js",
 ];
 
@@ -23,15 +27,8 @@ const APP_SHELL_INMUTABLE = [
   "/assets/vendor/bootstrap/css/bootstrap.css",
   "/assets/vendor/bootstrap/js/bootstrap.js",
   "/assets/vendor/bootstrap-icons/bootstrap-icons.css",
-  "/assets/vendor/bootstrap-icons/bootstrap-icons.woff",
-  "/assets/vendor/bootstrap-icons/bootstrap-icons.woff2",
   "/assets/vendor/boxicons/css/boxicons.css",
-  "/assets/vendor/boxicons/fonts/boxicons.css",
-  "/assets/vendor/boxicons/css/boxicons.eot",
-  "/assets/vendor/boxicons/css/boxicons.svg",
-  "/assets/vendor/boxicons/css/boxicons.woff",
-  "/assets/vendor/boxicons/css/boxicons.ttf",
-  "/assets/vendor/boxicons/css/boxicons.woff2",
+  "/assets/vendor/boxicons/fonts/boxicons.eot",
   "/assets/vendor/simple-datatables/simple-datatables.js",
   "/assets/vendor/simple-datatables/style.css",
 ];
@@ -63,3 +60,5 @@ self.addEventListener("activate", (e) => {
   });
   e.waitUntil(response);
 });
+
+self.addEventListener("fetch", (e) => {});
