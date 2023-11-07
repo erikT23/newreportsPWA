@@ -1,7 +1,6 @@
 importScripts("https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js");
 importScripts("/assets/js/utils/db-utils.js");
 
-
 const STATIC = "static-v1";
 const DYNAMIC = "dynamic-v1";
 const INMUTABLE = "inmutable-v1";
@@ -61,4 +60,29 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(response);
 });
 
-self.addEventListener("fetch", (e) => {});
+self.addEventListener("fetch", (e) => {
+  let response;
+  if (e.request.url.includes("/api/")) {
+    //network with cache fallback
+    response = apiIncidenceManager(DYNAMIC, e.request);
+  } else {
+    //cache with network fallback
+    response = caches.match(e.request).then((cacheRes) => {
+      if (cacheRes) {
+        updateStaticCache(STATIC, e.request, APP_SHELL_INMUTABLE);
+        return cacheRes;
+      } else {
+        return fetch(e.request).then((res) => {
+          return updateDynamicCache(DYNAMIC, e.request, res);
+        });
+      }
+    });
+  }
+  e.respondWith(response);
+});
+
+self.addEventListener("sync", (e) => {
+  if (e.tag === "incidence-post") {
+    e.waitUntil(savePostIncidence());
+  }
+});

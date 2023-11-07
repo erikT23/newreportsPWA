@@ -24,18 +24,26 @@ const saveIncidences = (incidence) => {
 
 const savePostIncidence = () => {
   const incidences = [];
-  return indicencesDB.allDocs({ include_docs: true }).then((docs) => {
+  return indicencesDB.allDocs({ include_docs: true }).then(async (docs) => {
     const { rows } = docs;
     for (const row of rows) {
       const { doc } = row;
-      const response = axiosClient
-        .post("/incidences/save")
-        .then((res) => {
-          return incidencesDB.remove(doc);
-        })
-        .catch(console.log);
-      incidences.push(response);
+      const response = await fetch(
+        "http://206.189.234.55:3000/api/incidences/status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(doc),
+        }
+      );
+      const data = await response.json();
+      if (data["changed"]) {
+        incidences.push(response);
+        return indicencesDB.remove(doc);
+      }
     }
-    return Promise.all(incidences);
+    return Promise.all([...incidences, getAllIncidencesPending()]);
   });
 };

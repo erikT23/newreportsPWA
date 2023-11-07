@@ -6,8 +6,15 @@
  * License: https://bootstrapmade.com/license/
  */
 
+var fullname = ``;
+var role = ``;
+let swReg;
+
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register("/sw.js");
+  navigator.serviceWorker.register("/sw.js").then((sw) => {
+    swReg = sw;
+    swReg.pushManager.getSubscription().then(verifyNotifications());
+  });
 }
 
 const isOnline = () => {
@@ -21,8 +28,69 @@ const isOnline = () => {
 window.addEventListener("online", isOnline);
 window.addEventListener("offline", isOnline);
 
-var fullname = ``;
-var role = ``;
+const verifyNotifications = (activated) => {
+  if (activated) {
+    $("#notifyActivated").css("display", "block");
+    $("#notifyDeactivated").css("display", "none");
+  } else {
+    $("#notifyActivated").css("display", "none");
+    $("#notifyDeactivated").css("display", "block");
+  }
+};
+
+const parseJWT = () => {
+  const token = localStorage.getItem("token");
+  const payload = token.split(".")[1];
+  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+  const data = decodeURIComponent(
+    window
+      .atob(base64)
+      .split("")
+      .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+      .join("")
+  );
+};
+
+$(document).on("click", "#notifications", async (e) => {
+  try {
+    if (!swReg) return;
+    const subscription = await swReg.pushManager.getSubscription();
+    if (subscription) {
+      subscription.unSubcribe().then(() => verifyNotifications(false));
+      return;
+    }
+    const response = await axiosClient.get("/notification/", {
+      responseType: "arraybuffer",
+    });
+    const data = new Uint8Array(response);
+    swReg.pushManager
+      .subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: data,
+      })
+      .then((res) => res.toJSON())
+      .then(async (subscription) => {
+        console.log(subscription);
+        const user = parseJWT();
+        await axiosClient
+          .post("/notification/", {
+            id: user.id,
+            userDetails: { subscription },
+          })
+          .then((res) => {
+            verifyNotifications(res["updated"]);
+          })
+          .catch((err) => {
+            swReg.pushManager.getSubscription().then((sub) => {
+              sub.unSubcribe().then(verifyNotifications(false));
+            });
+          });
+      });
+  } catch (error) {
+    console.log();
+  }
+});
+
 const changeView = (role) => {
   role = role;
   switch (role) {

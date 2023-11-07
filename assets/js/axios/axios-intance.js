@@ -1,14 +1,13 @@
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:3000/api',
-  timeout: 3000,
+  baseURL: '"http://206.189.234.55:3001/api"',
 });
 
 axiosClient.interceptors.request.use(
   function (config) {
     // Do something before request is sent
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      if (!config.url.includes('auth')) {
+      if (!config.url.includes("auth")) {
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
